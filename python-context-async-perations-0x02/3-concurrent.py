@@ -3,13 +3,13 @@ import asyncio
 
 DB_NAME = "airbnb.db"
 
-async def asyncfetchusers():
+async def async_fetch_users():
     async with aiosqlite.connect(DB_NAME) as db:
         async with db.execute("SELECT * FROM users") as cursor:
             users = await cursor.fetchall()
             return users
 
-async def asyncfetcholder_users():
+async def async_fetch_older_users():
     async with aiosqlite.connect(DB_NAME) as db:
         async with db.execute("SELECT * FROM users WHERE age > 40") as cursor:
             older_users = await cursor.fetchall()
@@ -17,8 +17,8 @@ async def asyncfetcholder_users():
 
 async def fetch_concurrently():
     results = await asyncio.gather(
-        asyncfetchusers(),
-        asyncfetcholder_users()
+        async_fetch_users(),
+        async_fetch_older_users()
     )
 
     users, older_users = results
