@@ -1,13 +1,23 @@
+import uuid
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+
+
 class CustomUser(AbstractUser):
-    # Add any additional fields you need
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)  # UUID as primary key
+    user_id = models.CharField(max_length=100, unique=True)  # Optional external user ID
+    email = models.EmailField(unique=True)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
     display_name = models.CharField(max_length=150, blank=True)
     is_online = models.BooleanField(default=False)
 
+    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
+    USERNAME_FIELD = 'username'
+
     def __str__(self):
         return self.username
+
 
 
 class Conversation(models.Model):
