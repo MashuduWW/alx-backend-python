@@ -1,17 +1,28 @@
-# messaging_app/chats/permissions.py
 
 from rest_framework import permissions
 
-class IsParticipant(permissions.BasePermission):
+
+class IsParticipantOfConversation(permissions.BasePermission):
     """
-    Allows access only to users who are participants of the conversation.
+    Custom permission:
+    - Only authenticated users can access.
+    - Only participants of the conversation can view/send/update/delete messages.
     """
 
+    def has_permission(self, request, view):
+        # Require authentication for any access
+        return request.user and request.user.is_authenticated
+
     def has_object_permission(self, request, view, obj):
-        # Assumes obj is a Conversation or Message instance with participants
         user = request.user
+
+        # For Conversation objects, check participants directly
         if hasattr(obj, 'participants'):
             return user in obj.participants.all()
-        elif hasattr(obj, 'conversation'):
+
+        # For Message objects, check participants of the related conversation
+        if hasattr(obj, 'conversation'):
             return user in obj.conversation.participants.all()
+
+        # Default deny
         return False
