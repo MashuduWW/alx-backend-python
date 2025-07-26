@@ -34,6 +34,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'chats',
     'rest_framework',
+    'django_filters',
     'rest_framework.authtoken',
     'corsheaders',
     'django.contrib.admin',
@@ -70,6 +71,9 @@ REST_FRAMEWORK = {
 
       
     ],
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
 }
 
 
