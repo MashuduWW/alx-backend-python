@@ -1,8 +1,8 @@
-# chats/middleware.py
 
-from datetime import datetime, time
 import logging
-from django.http import HttpResponseForbidden
+from datetime import datetime, timedelta, time
+from collections import defaultdict
+from django.http import HttpResponseForbidden, JsonResponse
 
 logger = logging.getLogger(__name__)
 
@@ -27,3 +27,50 @@ class RestrictAccessByTimeMiddleware:
         if not (self.allowed_start <= now <= self.allowed_end):
             return HttpResponseForbidden("Access not allowed at this time.")
         return self.get_response(request)
+
+
+
+
+
+
+
+class OffensiveLanguageMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        # Dictionary to store IP: [timestamps of recent POSTs]
+        self.message_log = defaultdict(list)
+        self.MESSAGE_LIMIT = 5
+        self.TIME_WINDOW = timedelta(minutes=1)
+
+    def __call__(self, request):
+        if request.method == 'POST' and request.path.startswith('/api/'):  # adjust path filter if needed
+            ip = self.get_client_ip(request)
+            now = datetime.now()
+
+            # Remove timestamps older than the time window
+            self.message_log[ip] = [
+                timestamp for timestamp in self.message_log[ip]
+                if now - timestamp <= self.TIME_WINDOW
+            ]
+
+            if len(self.message_log[ip]) >= self.MESSAGE_LIMIT:
+                return JsonResponse(
+                    {"error": "Message rate limit exceeded. Please wait before sending more messages."},
+                    status=429
+                )
+
+            # Record the new message timestamp
+            self.message_log[ip].append(now)
+
+        return self.get_response(request)
+
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(",")[0]
+        else:
+            ip = request.META.get("REMOTE_ADDR")
+        return ip
+
+
+
