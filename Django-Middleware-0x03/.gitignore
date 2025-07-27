@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+*.pyo
+*.pyd
+*.pdb
+*.log
+*.sqlite3
+
+# Django
+*.sqlite3
+*.pyc
+db.sqlite3
+media/
+staticfiles/
+
+# Environment
+.env
+venv/
+.env.*
+
+# VSCode
+.vscode/
+
+# PyCharm
+.idea/
+*.iml
+
+# Mac/Linux
+.DS_Store
+
+# Migrations (optional)
+**/migrations/__pycache__/
+**/migrations/*.pyc
+**/migrations/*.pyo
+# Uncomment if you want to ignore all migration files
+# **/migrations/*.py
+
+# Coverage reports
+htmlcov/
+.coverage
+
+# Byte-compiled Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Test cache
+.cache/
+pytest_cache/
+
+# Others
+*.bak
+*.swp
