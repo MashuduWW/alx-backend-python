@@ -1,3 +1,6 @@
+from chats.filters import MessageFilter
+from chats.pagination import MessagePagination
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
