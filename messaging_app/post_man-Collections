@@ -1,0 +1,29 @@
+import json
+
+collection = {
+    "info": {
+        "name": "Messaging App API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "User Login",
+            "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": json.dumps({"username": "testuser", "password": "testpass"})
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/auth/login",
+                    "host": ["{{base_url}}"],
+                    "path": ["api","auth","login"]
+                }
+            }
+        }
+    ]
+}
+
+with open('messaging_app/post_man-Collections.json', 'w') as f:
+    json.dump(collection, f, indent=2)
