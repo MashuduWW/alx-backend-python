@@ -74,3 +74,26 @@ class OffensiveLanguageMiddleware:
 
 
 
+class RolePermissionMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.user.is_authenticated:
+            allowed_roles = ['admin', 'moderator']
+            user_role = getattr(request.user, 'role', None)
+
+            if user_role not in allowed_roles:
+                return JsonResponse(
+                    {"error": "Forbidden: You do not have permission to access this resource."},
+                    status=403
+                )
+        return self.get_response(request)
+
+
+
+
+
+
+
+
