@@ -39,14 +39,7 @@ def delete_user(request):
     return render(request, 'delete_user.html')  # Show a confirmation form
 
 
-def message_detail(request, message_id):
-    root_message = get_object_or_404(Message, pk=message_id)
-    thread = get_thread(root_message)
 
-    return render(request, 'message_detail.html', {
-        'thread': thread,
-        'root': root_message
-    })
 
 @login_required
 def reply_message(request, parent_id):
@@ -72,6 +65,41 @@ def unread_inbox(request):
         'messages': unread_messages
     })
 
+
+
+# messaging/views.py
+
+from django.shortcuts import get_object_or_404, render
+from .models import Message
+
+def get_message_thread(message):
+    """
+    Recursively collects all replies to a message in a threaded format.
+    Returns a list of (message, depth) tuples.
+    """
+    thread = []
+
+    def recurse(msg, depth=0):
+        thread.append((msg, depth))
+        replies = msg.replies.select_related('sender').all().order_by('timestamp')
+        for reply in replies:
+            recurse(reply, depth + 1)
+
+    recurse(message)
+    return thread
+
+def message_detail(request, message_id):
+    root_message = get_object_or_404(
+        Message.objects.select_related('sender', 'receiver'),  # ✅ select_related
+        pk=message_id
+    )
+
+    thread = get_message_thread(root_message)  # ✅ recursive query using .filter + select_related internally
+
+    return render(request, 'message_detail.html', {
+        'root': root_message,
+        'thread': thread
+    })
 
 
 
