@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+
+<h2>Unread Messages</h2>
+{% for message in messages %}
+  <div>
+    <strong>From:</strong> {{ message.sender.username }} <br>
+    <strong>At:</strong> {{ message.timestamp }} <br>
+    <p>{{ message.content }}</p>
+  </div>
+{% empty %}
+  <p>No unread messages.</p>
+{% endfor %}
+
+
+
+</body>
+</html>

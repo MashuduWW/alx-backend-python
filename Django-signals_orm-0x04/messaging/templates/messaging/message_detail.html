@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+
+<h2>Conversation Thread</h2>
+{% for msg, level in thread %}
+  <div style="margin-left: {{ level|add:"1" }}em;">
+    <p><strong>{{ msg.sender.username }}</strong>: {{ msg.content }} <em>at {{ msg.timestamp }}</em></p>
+    {% if msg.edited %}
+      <small>(edited)</small>
+    {% endif %}
+  </div>
+{% endfor %}
+
+
+
+<form method="post" action="{% url 'reply_message' parent_id=root.id %}">
+  {% csrf_token %}
+  <textarea name="content" rows="3" required></textarea><br>
+  <button type="submit">Reply</button>
+</form>
+
+
+
+
+</body>
+</html>
