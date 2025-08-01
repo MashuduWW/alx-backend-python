@@ -17,23 +17,25 @@ def create_notification_on_message(sender, instance, created, **kwargs):
         )
 
 
+# signals.py
 @receiver(pre_save, sender=Message)
 def log_message_edit(sender, instance, **kwargs):
     if not instance.pk:
-        return  
+        return  # New message, not an edit
 
     try:
-        old_message = Message.objects.get(pk=instance.pk)
+        old = Message.objects.get(pk=instance.pk)
     except Message.DoesNotExist:
-        return  
+        return
 
-    if old_message.content != instance.content:
-        
+    if old.content != instance.content:
         MessageHistory.objects.create(
             message=instance,
-            old_content=old_message.content
+            old_content=old.content,
+            edited_by=instance.edited_by  # Track editor
         )
         instance.edited = True
+
 
 
 
@@ -45,3 +47,10 @@ def cleanup_user_data(sender, instance, **kwargs):
 
     # Delete notifications (redundant if FK uses CASCADE)
     Notification.objects.filter(user=instance).delete()
+
+
+
+
+
+
+

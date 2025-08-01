@@ -11,17 +11,26 @@ def message_history(request, message_id):
     return render(request, 'message_history.html', {'message': message, 'history': history})
 
 
+# example edit view
 @login_required
-def delete_user(request):
-    user = request.user
-    logout(request)  # End the session first
-    user.delete()
-    return redirect('account_deleted')  # Redirect to a success page
+def edit_message(request, message_id):
+    message = get_object_or_404(Message, pk=message_id, sender=request.user)
+
+    if request.method == "POST":
+        new_content = request.POST['content']
+        message.content = new_content
+        message.edited_by = request.user
+        message.save()
+        return redirect('inbox')  # or wherever
+
+    return render(request, 'edit_message.html', {'message': message})
 
 
 
 def account_deleted(request):
     return render(request, 'account_deleted.html')
+
+
 
 
 
