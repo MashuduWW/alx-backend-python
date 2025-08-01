@@ -13,7 +13,6 @@ def message_history(request, message_id):
     return render(request, 'message_history.html', {'message': message, 'history': history})
 
 
-# example edit view
 @login_required
 def edit_message(request, message_id):
     message = get_object_or_404(Message, pk=message_id, sender=request.user)
@@ -55,7 +54,6 @@ def reply_message(request, parent_id):
     
 
 
-from .models import Message
 
 @login_required
 def unread_inbox(request):
@@ -66,11 +64,6 @@ def unread_inbox(request):
     })
 
 
-
-# messaging/views.py
-
-from django.shortcuts import get_object_or_404, render
-from .models import Message
 
 def get_message_thread(message):
     """
@@ -88,23 +81,39 @@ def get_message_thread(message):
     recurse(message)
     return thread
 
+@login_required
 def message_detail(request, message_id):
-    root_message = get_object_or_404(
-        Message.objects.select_related('sender', 'receiver'),  # ✅ select_related
+    root = get_object_or_404(
+        Message.objects.select_related('sender', 'receiver'),
         pk=message_id
     )
 
-    thread = get_message_thread(root_message)  # ✅ recursive query using .filter + select_related internally
+    thread = get_threaded_replies(root)
 
     return render(request, 'message_detail.html', {
-        'root': root_message,
+        'root': root,
         'thread': thread
     })
 
 
+def get_threaded_replies(root_message):
+    """
+    Recursively fetch all replies using Message.objects.filter
+    and optimize with select_related for sender.
+    Returns a list of (message, depth) tuples.
+    """
+    thread = []
 
+    def recurse(message, depth):
+        thread.append((message, depth))
 
+        # ✅ Explicit use of Message.objects.filter
+        replies = Message.objects.filter(parent_message=message).select_related('sender').order_by('timestamp')
 
+        for reply in replies:
+            recurse(reply, depth + 1)
 
+    recurse(root_message, 0)
+    return thread
 
 
