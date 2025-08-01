@@ -57,9 +57,8 @@ def reply_message(request, parent_id):
 
 @login_required
 def unread_inbox(request):
-    unread_messages = Message.unread.for_user(request.user)
-
-    return render(request, 'inbox_unread.html', {
+    unread_messages = Message.unread.unread_for_user(request.user).only('id', 'sender', 'content', 'timestamp')
+    return render(request, 'unread_inbox.html', {
         'messages': unread_messages
     })
 
@@ -115,5 +114,7 @@ def get_threaded_replies(root_message):
 
     recurse(root_message, 0)
     return thread
+
+
 
 
