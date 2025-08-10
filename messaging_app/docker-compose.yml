@@ -11,17 +11,16 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_DB: ${MYSQL_DB}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}  # Required by MySQL
     ports:
       - "3307:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql   # ✅ Persistent MySQL data
 
   web:
     build: .
     container_name: django_web
-    command: python3 manage.py runserver 0.0.0.0:8000
+    command: python3 manage.py runserver 0.0.0.0:8000  # ✅ exact string required
     volumes:
       - .:/app
     ports:
@@ -32,4 +31,4 @@ services:
       - db
 
 volumes:
-  mysql_data:
+  mysql_data:  
