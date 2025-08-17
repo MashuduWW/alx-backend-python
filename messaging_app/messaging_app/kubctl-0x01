@@ -1,0 +1,39 @@
+#!/bin/bash
+
+
+set -e  # Exit on error
+
+DEPLOYMENT_NAME="messaging-app-deployment"
+SERVICE_NAME="messaging-app-service"
+NAMESPACE="default"
+REPLICAS=3
+
+echo "Scaling $DEPLOYMENT_NAME to $REPLICAS replicas..."
+kubectl scale deployment "$DEPLOYMENT_NAME" --replicas=$REPLICAS -n $NAMESPACE
+
+echo "Waiting for pods to scale..."
+sleep 10
+
+echo "Verifying pods:"
+kubectl get pods -l app=messaging-app -n $NAMESPACE
+
+# Get the ClusterIP and port of the service
+SERVICE_IP=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
+SERVICE_PORT=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
+
+echo "Messaging app Service is available at: http://$SERVICE_IP:$SERVICE_PORT"
+
+# Perform load testing using wrk (must be installed)
+if command -v wrk &> /dev/null
+then
+    echo "⚡ Running load test with wrk..."
+    wrk -t2 -c50 -d30s http://$SERVICE_IP:$SERVICE_PORT/
+else
+    echo "wrk not installed. Install it to run load tests: https://github.com/wg/wrk"
+fi
+
+# Monitor resource usage
+echo "Monitoring resource usage..."
+kubectl top pods -n $NAMESPACE || echo "Metrics server not installed. Install it with: kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml"
+
+echo "Scaling and testing complete!"
