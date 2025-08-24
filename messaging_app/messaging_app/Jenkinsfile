@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+
+    triggers {
+        // Manual trigger only, no SCM poll
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/your-username/your-repo.git'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'pip install -r requirements.txt'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'pytest --junitxml=report.xml --html=report.html --self-contained-html'
+            }
+            post {
+                always {
+                    junit 'report.xml'
+                    publishHTML(target: [
+                        reportDir: '.',
+                        reportFiles: 'report.html',
+                        reportName: 'Pytest HTML Report'
+                    ])
+                }
+            }
+        }
+    }
+
+    options {
+        disableConcurrentBuilds()
+    }
+}
