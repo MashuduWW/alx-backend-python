@@ -1,27 +1,34 @@
 pipeline {
     agent any
 
-    triggers {
-        // Manual trigger only, no SCM poll
-    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    credentialsId: 'github-creds',   // replace with your Jenkins credentialsId
+                    url: pipeline {
+    agent any
 
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/your-username/your-repo.git'
+                    credentialsId: 'Karabo20',
+                    url: 'https://github.com/MashuduWW/alx-backend-python.git'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh 'pip install -r requirements.txt'
+                sh 'python3 -m venv venv'
+                sh '. venv/bin/activate && pip3 install --upgrade pip'
+                sh '. venv/bin/activate && pip3 install -r messaging_app/requirements.txt'
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'pytest --junitxml=report.xml --html=report.html --self-contained-html'
+                sh '. venv/bin/activate && pytest messaging_app/tests --junitxml=report.xml --html=report.html --self-contained-html'
             }
             post {
                 always {
@@ -35,8 +42,33 @@ pipeline {
             }
         }
     }
+}
 
-    options {
-        disableConcurrentBuilds()
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'python3 -m venv venv'
+                sh '. venv/bin/activate && pip3 install --upgrade pip'
+                sh '. venv/bin/activate && pip3 install -r messaging_app/requirements.txt'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh '. venv/bin/activate && pytest messaging_app/tests --junitxml=report.xml --html=report.html --self-contained-html'
+            }
+            post {
+                always {
+                    junit 'report.xml'
+                    publishHTML(target: [
+                        reportDir: '.',
+                        reportFiles: 'report.html',
+                        reportName: 'Pytest HTML Report'
+                    ])
+                }
+            }
+        }
     }
 }
